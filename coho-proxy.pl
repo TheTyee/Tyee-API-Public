@@ -261,6 +261,23 @@ get '/story/:uuid' => sub {
     proxy_render( $m, json_to_json( $r->content ) );
 };
 
+get '/search/path/(*query)' => sub {
+    my $m = shift;
+
+    my $ua      = LWP::UserAgent->new;
+    my $elastic = {
+        size  => 25,
+        query => { field => { path => $m->param( "query" ) } }
+    };
+
+    my $r = $ua->post(
+        "http://localhost:9200/tyee/story/_search",
+        Content => encode_json( $elastic )
+    );
+
+    proxy_render( $m, json_to_json( $r->content ) );
+};
+
 get '/search/(*query)' => sub {
     my $m = shift;
 
@@ -277,6 +294,8 @@ get '/search/(*query)' => sub {
 
     proxy_render( $m, json_to_json( $r->content ) );
 };
+
+
 
 =head1 Stories by topic
 
