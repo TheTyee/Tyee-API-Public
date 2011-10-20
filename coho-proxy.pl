@@ -141,7 +141,7 @@ get '/latest/grouped' => sub {
     push @{ $structure->{'hits'}->{'hits'} }, @{ $j->{'hits'}->{'hits'} };
 
     # news sections
-    my %titles = ( Arts => "Arts & Culture" );
+    my %titles = ( Arts => "Arts and Culture" );
     $elastic->{'size'} = 6;
     foreach my $section ( qw/News Opinion Mediacheck Arts Books Life/ ) {
         $elastic->{'query'} = { field => { section => $section } };
@@ -311,7 +311,7 @@ B<Requires Authentication:> Not currently. Might in the future.
 
 B<API rate limit:> No limits currently. Rate limits will apply in future versions.
 
-B<Parameters:> Topic. Required. (Valid parameters are: News, Opinion, Mediacheck, Arts & Culture, Books, Life, 2010 Olympics, Education, Energy, Environment, Federal Election 2011, Film, Food, Food + Farming, Gender + Sexuality, Health, Housing, Labour, Music, Photo Essays, Podcasts, Politics, Rights + Justice, Science + Tech, Transportation, Travel, Tyee News, Urban Design + Architecture, Video.)
+B<Parameters:> Topic. Required. (Valid parameters are: News, Opinion, Mediacheck, Arts and Culture, Books, Life, 2010 Olympics, Education, Energy, Environment, Federal Election 2011, Film, Food, Food + Farming, Gender + Sexuality, Health, Housing, Labour, Music, Photo Essays, Podcasts, Politics, Rights + Justice, Science + Tech, Transportation, Travel, Tyee News, Urban Design + Architecture, Video.)
 
 =cut 
 
@@ -319,10 +319,14 @@ get '/topic/:topic' => sub {
     my $m       = shift;
     my $topic   = $m->param( "topic" );
     my $ua      = LWP::UserAgent->new;
+
+    # topic title remapping
+    my %remap = ( Arts => "Arts and Culture", "Arts & Culture" => "Arts and Culture" );
+
     my $elastic = {
         "size" => 25,
         "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
-        query => { field => { topics => '"' . $topic . '"' } }
+        query => { field => { topics => '"' . ($remap{$topic} || $topic) . '"' } }
     };
 
     my $r = $ua->post(
