@@ -338,7 +338,8 @@ get '/topic/:topic' => sub {
     proxy_render( $m, json_to_json( $r->content ) );
 };
 
-get '/lastest/blogs' => sub {
+get '/latest/blogs' => sub {
+    my $m       = shift;
     my $ua      = LWP::UserAgent->new;
 
     my $elastic = {
