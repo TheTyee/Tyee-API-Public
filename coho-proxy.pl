@@ -338,6 +338,23 @@ get '/topic/:topic' => sub {
     proxy_render( $m, json_to_json( $r->content ) );
 };
 
+get '/lastest/blogs' => sub {
+    my $ua      = LWP::UserAgent->new;
+
+    my $elastic = {
+        "size" => 25,
+        "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
+        query => { field => { story_type => "blog_entry" } }
+    };
+
+    my $r = $ua->post(
+        "http://localhost:9200/tyee/story/_search",
+        Content => encode_json( $elastic )
+    );
+
+    proxy_render( $m, json_to_json( $r->content ) );
+};
+
 =head1 Story by path 
 
 Returns a story by path. 
