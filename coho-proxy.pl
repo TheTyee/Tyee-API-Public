@@ -267,7 +267,6 @@ get '/search/path/(*query)' => sub {
     my $ua      = LWP::UserAgent->new;
     my $elastic = {
         size  => 25,
-        "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
         query => { field => { path => $m->param( "query" ) } }
     };
 
