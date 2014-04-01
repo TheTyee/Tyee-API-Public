@@ -143,7 +143,7 @@ get '/latest/grouped' => sub {
     # news sections
     my %titles = ( Arts => "Arts and Culture" );
     $elastic->{'size'} = 6;
-    foreach my $section ( qw/News Opinion Mediacheck Arts Books Life/ ) {
+    foreach my $section ( qw/News Opinion Mediacheck Culture Solutions National/ ) {
         $elastic->{'query'} = { field => { section => $section } };
         $j = &$fetch_subset( $elastic, $titles{$section} || $section );
         push @{ $structure->{'hits'}->{'hits'} }, @{ $j->{'hits'}->{'hits'} };
