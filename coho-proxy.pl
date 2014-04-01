@@ -129,7 +129,7 @@ get '/latest/grouped' => sub {
         size   => 4,
         "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
         query  => {
-            field => { section => "Opinion News Mediacheck Arts Books Life" }
+            field => { section => "Opinion News Mediacheck Culture Solutions National" }
         }
     };
     my $structure = &$fetch_subset( $elastic, "Today's Features" );
@@ -337,7 +337,8 @@ get '/topic/:topic' => sub {
     proxy_render( $m, json_to_json( $r->content ) );
 };
 
-get '/lastest/blogs' => sub {
+get '/latest/blogs' => sub {
+    my $m       = shift;
     my $ua      = LWP::UserAgent->new;
 
     my $elastic = {
