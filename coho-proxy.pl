@@ -129,7 +129,7 @@ get '/latest/grouped' => sub {
         size   => 4,
         "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
         query  => {
-            field => { section => "Opinion News Mediacheck Culture Solutions National" }
+            field => { topics => "Opinion News Mediacheck Culture Solutions National" }
         }
     };
     my $structure = &$fetch_subset( $elastic, "Today's Features" );
@@ -144,7 +144,7 @@ get '/latest/grouped' => sub {
     my %titles = ( Arts => "Arts and Culture" );
     $elastic->{'size'} = 6;
     foreach my $section ( qw/News Opinion Mediacheck Culture Solutions National/ ) {
-        $elastic->{'query'} = { field => { section => $section } };
+        $elastic->{'query'} = { field => { topics => $section } };
         $j = &$fetch_subset( $elastic, $titles{$section} || $section );
         push @{ $structure->{'hits'}->{'hits'} }, @{ $j->{'hits'}->{'hits'} };
     }
