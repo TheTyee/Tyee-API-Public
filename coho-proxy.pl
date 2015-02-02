@@ -129,7 +129,7 @@ get '/latest/grouped' => sub {
         size   => 4,
         "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
         query  => {
-            field => { topics => "Opinion News Mediacheck Culture Solutions National" }
+            field => { topics => "News National Opinion Mediacheck Culture Solutions " }
         }
     };
     my $structure = &$fetch_subset( $elastic, "Today's Features" );
