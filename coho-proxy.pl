@@ -134,12 +134,6 @@ get '/latest/grouped' => sub {
     };
     my $structure = &$fetch_subset( $elastic, "Today's Features" );
 
-    # the hook
-    $elastic->{'size'} = 8;
-    $elastic->{'query'} = { field => { story_type => "blog" } };
-    my $j = &$fetch_subset( $elastic, "The Hook Blog" );
-    push @{ $structure->{'hits'}->{'hits'} }, @{ $j->{'hits'}->{'hits'} };
-
     # news sections
     my %titles = ( Arts => "Arts and Culture" );
     $elastic->{'size'} = 6;
