@@ -329,6 +329,56 @@ get '/keywordsearch/(*query)' => sub {
 
 
 
+=head1 Search for tags
+
+Returns stories that contain keyword. Use quotes to denote full term or will search for both terms, i.e. api.thetyee.ca/v1/keywordsearch/%22Christy%20Clark%22  returns correctly where http://preview.api.thetyee.ca/v1/keywordsearch/Christy%20Clark will return Christy Or Clark stories
+B<URL:> L<http://api.thetyee.ca/v1/story/>[uuid]
+
+B<Formats:> json, jsonp
+
+B<HTTP Method:> GET
+
+B<Requires Authentication:> Not currently. Might in the future.
+
+B<API rate limit:> No limits currently. Rate limits will apply in future versions.
+
+B<Parameters:> The UUID of the story to return. Required.
+
+=cut 
+
+get '/authorsearch/(*query)' => sub {
+    my $m = shift;
+
+    my $ua      = LWP::UserAgent->new;
+    my $elastic = {
+                "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
+        size  => 99999,
+        
+        query => { field => { byline => $m->param( "query" ) } }
+    };
+
+    my $r = $ua->post(
+        "http://localhost:9200/tyee/story/_search",
+        Content => encode_json( $elastic )
+    );
+
+    proxy_render( $m, json_to_json( $r->content ) );
+    
+    
+#$m->render(
+#        text   => Dumper($r),
+#        format => ( "html" )
+#    );
+
+};
+
+
+
+
+
+
+
+
 =head1 Stories by topic
 
 Returns a list of stories (maximum 25) by section or topic.
@@ -353,9 +403,13 @@ get '/topic/:topic/(:size)/(:from)' => sub {
     my $from    = $m->param( "from" );
     my $size    = $m->param( "size" );
     my $ua      = LWP::UserAgent->new;
+	use URI::Escape;
+    $topic = uri_unescape($topic);
 
     # topic title remapping
-    my %remap = ( Arts => "Arts and Culture", "Arts & Culture" => "Arts and Culture" );
+    my %remap = ( Arts => "Arts and Culture", 
+			"Arts & Culture" => "Arts and Culture",
+			);
 
     my $elastic = {
 	"from" => $from,
@@ -387,7 +441,7 @@ get '/keyword/:keyword/(:size)/(:from)' => sub {
         "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
         query => { query_string => {
                                     
-                                    query => "*Christy*",
+                                    query => $m->param( "keyword" ),
                                     fields => "keywords"
                                     
                                     } }
@@ -398,15 +452,57 @@ get '/keyword/:keyword/(:size)/(:from)' => sub {
         Content => encode_json( $elastic )
     );
 
-# proxy_render( $m, json_to_json( $r->content ) );
+ proxy_render( $m, json_to_json( $r->content ) );
 use Data::Dumper;
 # print "hello";
 # print Dumper($r);
 
-$m->render(
-        text   => Dumper($r),
-        format => ( "html" )
+
+#$m->render(
+#        text   => $r,
+#        format => ( "html" )
+#    );
+
+
+
+
+
+};
+
+
+get '/searchme/:terms/(:size)/(:from)' => sub {	
+    my $m       = shift;
+    my $terms  = $m->param( "terms" );
+    my $from    = $m->param( "from" );
+    my $size    = $m->param( "size" );
+    my $ua      = LWP::UserAgent->new;
+
+ 
+    my $elastic = {
+	"from" => $from,
+        "size" => $size,
+        "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
+        query => { query_string => {
+                                     query => $terms,
+                                    # fields => "textWithHtml",
+                                    } }
+    };
+
+    my $r = $ua->post(  
+        "http://localhost:9200/tyee/story/_search",
+        Content => encode_json( $elastic )
     );
+
+ proxy_render( $m, json_to_json( $r->content ) );
+#use Data::Dumper;
+# print "hello";
+# print Dumper($r);
+
+
+#$m->render(
+ #       text   => $r,
+ #       format => ( "html" )
+ #   );
 
 
 
