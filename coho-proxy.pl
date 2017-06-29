@@ -68,6 +68,7 @@ Example JSON representation of a story: https://gist.github.com/965479
 
 use local::lib '/var/home/tyeeapi/perl5';
 use Mojolicious::Lite;
+use Mojo::Util qw(b64_encode url_escape url_unescape encode decode);
 use JSON;
 use LWP::UserAgent;
 use HTTP::Request::Common;
@@ -477,14 +478,16 @@ get '/searchme/:terms/(:size)/(:from)' => sub {
     my $size    = $m->param( "size" );
     my $ua      = LWP::UserAgent->new;
 
- 
     my $elastic = {
 	"from" => $from,
         "size" => $size,
         "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
         query => { query_string => {
-                                     query => $terms,
-                                    # fields => "textWithHtml",
+                                    query => $terms,
+                                    default_operator => "AND",
+      #                             query => "six ways to end homelessness"
+                                   #  fields => "textWithHtml,title,byline,teaser",
+                                   #  default_field => "_all"
                                     } }
     };
 
@@ -492,8 +495,9 @@ get '/searchme/:terms/(:size)/(:from)' => sub {
         "http://localhost:9200/tyee/story/_search",
         Content => encode_json( $elastic )
     );
+my $content = json_to_json( $r->content);
 
- proxy_render( $m, json_to_json( $r->content ) );
+ proxy_render( $m, $content );
 #use Data::Dumper;
 # print "hello";
 # print Dumper($r);
