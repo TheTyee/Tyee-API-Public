@@ -346,16 +346,25 @@ B<API rate limit:> No limits currently. Rate limits will apply in future version
 B<Parameters:> The UUID of the story to return. Required.
 
 =cut 
-
-get '/authorsearch/(*query)' => sub {
-    my $m = shift;
-
+get '/author/:author/(:size)/(:from)' => sub {	
+    my $m       = shift;
+    my $author   = $m->param( "author" );
+    my $from    = $m->param( "from" );
+    my $size    = $m->param( "size" );
     my $ua      = LWP::UserAgent->new;
+	use URI::Escape;
+    $author = uri_unescape($author);
+
+    # topic title remapping
+    my %remap = ( Arts => "Arts and Culture", 
+			"Arts & Culture" => "Arts and Culture",
+			);
+
     my $elastic = {
-                "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
-        size  => 99999,
-        
-        query => { field => { byline => $m->param( "query" ) } }
+	"from" => $from,
+        "size" => $size,
+        "sort" => [ { "storyDate" => { "reverse" => 1 } } ],
+        query => { field => { byline => '"' . ($author) . '"' } }
     };
 
     my $r = $ua->post(
@@ -364,13 +373,6 @@ get '/authorsearch/(*query)' => sub {
     );
 
     proxy_render( $m, json_to_json( $r->content ) );
-    
-    
-#$m->render(
-#        text   => Dumper($r),
-#        format => ( "html" )
-#    );
-
 };
 
 
